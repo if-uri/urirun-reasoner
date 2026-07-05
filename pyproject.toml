@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urirun-reasoner"
+version = "0.1.0"
+description = "Intent → need → capability → URI plan, headless-first. Model the goal not the app: a missing GUI editor is one blocked method, not the end. Deterministic core, LLM only as fallback."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Tom Sapletta" }]
+dependencies = []
+
+[project.scripts]
+urirun-reasoner = "urirun_reasoner.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["urirun_reasoner*"]
