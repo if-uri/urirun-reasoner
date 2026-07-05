@@ -105,3 +105,15 @@ def test_audit_catches_bare_payment():
     from urirun_reasoner import gates
     risky = gates.has_ungated_risk([{"uri": "fiverr://user/order/command/pay"}])
     assert risky == ["fiverr://user/order/command/pay"]
+
+
+def test_generator_scaffolds_a_valid_connector(tmp_path):
+    from urirun_reasoner import generator
+    spec = {"id": "demo", "scheme": "demo", "summary": "x",
+            "handlers": [{"route": "thing/query/list", "params": "", "body": 'return _ok(action="x")'}]}
+    r = generator.generate(spec, tmp_path)
+    assert r["ok"] and r["routes"] == ["thing/query/list"]
+    core = (tmp_path / "urirun-connector-demo" / "urirun_connector_demo" / "core.py").read_text()
+    assert 'scheme="demo"' in core and "def thing_query_list" in core
+    assert (tmp_path / "urirun-connector-demo" / "pyproject.toml").is_file()
+    assert (tmp_path / "urirun-connector-demo" / "tests" / "test_demo.py").is_file()
