@@ -1,0 +1,47 @@
+# Intent catalog — what the user really wants to ACHIEVE, not which app to click.
+# The reasoner maps a prompt → intent → needs (capabilities) + gates (human approvals).
+intents:
+  content.linkedin.from_youtube:
+    goal: "Publish a LinkedIn post derived from a YouTube stream."
+    needs: [video.source, transcript.extract, social.copy.write, media.clip.create, linkedin.draft_or_schedule]
+    gates: [human_approval_before_publish]
+    fallbacks: [audio.transcribe, browser.linkedin_draft, artifact.markdown]
+
+  procurement.fiverr.pcb:
+    goal: "Order a PCB design on Fiverr from local project files."
+    needs: [project.files.find, pcb.project.inspect, vendor.search, brief.write, package.prepare, order.draft]
+    gates: [human_approval_before_message, human_approval_before_payment]
+    fallbacks: [browser.fiverr, artifact.order_brief, kicab.export_gerbers]
+
+  content.campaign.from_video_and_docs:
+    goal: "Build a week's LinkedIn campaign from a video + technical docs."
+    needs: [files.search, transcript.extract, ideas.extract, social.series.write, media.clips, calendar.schedule]
+    gates: [human_approval_before_publish]
+
+  hardware.prototype.rfq:
+    goal: "Turn a hardware idea into a vendor RFQ package."
+    needs: [project.search, bom.extract, market.availability, rfq.write, vendor.outreach]
+    gates: [human_approval_before_send]
+    fallbacks: [partial.bom_from_filenames, artifact.rfq_package]
+
+  deadline.procurement.multi_vendor_outreach:
+    goal: "By the deadline: an order paid, OR 3 vendor requests sent, OR a ready human package."
+    needs: [project.package, vendor.search, message.draft, escalation]
+    gates: [human_approval_before_payment, human_approval_before_message]
+    success_any_of: [order_paid_and_confirmed, 3_vendor_requests_sent, human_has_ready_package]
+
+  business.offer.prepare_from_existing_context:
+    goal: "Prepare a client offer PDF from scattered old quotes/notes; send draft for approval."
+    needs: [files.search, ocr.extract, records.search, offer.write, pdf.render, email.draft]
+    gates: [human_approval_before_send]
+
+  hardware.research.purchase.document:
+    goal: "Research a sensor, compare, order samples, then document into the project."
+    needs: [web.search, market.price, research.compare, cart.add, project.docs.update]
+    gates: [human_approval_before_purchase, human_approval_before_payment]
+
+  office.work.perform_on_node_or_fallback:
+    goal: "Perform office work on a node; if no editor, use a headless method."
+    needs: [office.document.create, document.verify]
+    fallbacks: [sheet.write, markdown.write, host_generate_and_sync, gui_editor]
+    gates: []   # producing a local document artifact is autonomous

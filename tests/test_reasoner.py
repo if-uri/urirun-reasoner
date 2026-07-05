@@ -78,3 +78,30 @@ def test_resolve_prompt_office_on_lenovo_reframes_to_headless():
     p = resolve_prompt("przetestuj biuro na lenovo", ctx)
     assert p["resolved"] and p["strategy"] == "host_fallback"
     assert p["need"] == "office.document.create" and not p["strategy"] == "gui"
+
+
+# --- gates: risky actions are never ungated -------------------------------------
+def test_gate_classifies_risky_verbs():
+    from urirun_reasoner import gates
+    assert gates.gate_for("linkedin://user/post/command/publish")
+    assert gates.gate_for("fiverr://user/order/command/pay")
+    assert gates.gate_for("email://user/message/command/send")
+    assert gates.gate_for("fs://host/file/command/write") is None      # autonomous
+    assert gates.gate_for("sheet://host/workbook/command/write") is None
+
+
+def test_gate_inserts_approval_before_publish():
+    from urirun_reasoner import gates
+    steps = [{"uri": "llm://host/social/command/write-linkedin-post"},
+             {"uri": "linkedin://user/post/command/publish"}]
+    out = gates.apply(steps)
+    assert out[0]["uri"].endswith("social/command/write-linkedin-post")   # autonomous kept
+    assert out[1]["uri"].startswith("approval://human/")                  # gate inserted
+    assert out[2]["gate"] == "required"
+    assert gates.has_ungated_risk(out) == []                              # audit clean
+
+
+def test_audit_catches_bare_payment():
+    from urirun_reasoner import gates
+    risky = gates.has_ungated_risk([{"uri": "fiverr://user/order/command/pay"}])
+    assert risky == ["fiverr://user/order/command/pay"]

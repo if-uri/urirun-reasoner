@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import capabilities as _caps
+from . import gates as _gates
 from . import needs as _needs
 
 
@@ -108,6 +109,7 @@ def resolve(need: _needs.NeedSpec, ctx: Context) -> dict[str, Any]:
     for strat in _LADDER:
         plan = strat(need, ctx)
         if plan:
+            plan["steps"] = _gates.apply(plan["steps"])  # insert approval:// before gated steps
             plan["need"] = need.id
             plan["postcondition"] = _postcondition(need, ctx.node)
             plan["resolved"] = True
